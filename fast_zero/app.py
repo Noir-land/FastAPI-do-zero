@@ -3,14 +3,20 @@ from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from fast_zero.database import get_session
 from fast_zero.models import User
-from fast_zero.schemas import Message, UserList, UserPublic, UserSchema
-from fast_zero.security import get_password_hash
+from fast_zero.schemas import Message, Token, UserList, UserPublic, UserSchema
+from fast_zero.security import (
+    create_acess_token,
+    get_current_user,
+    get_password_hash,
+    verify_password,
+)
 
 app = FastAPI()
 database = []
@@ -35,7 +41,10 @@ async def ola_mundo():
 
 
 @app.post("/users/", status_code=HTTPStatus.CREATED, response_model=UserPublic)
-def create_user(user: UserSchema, session=Depends(get_session)):
+def create_user(
+    user: UserSchema,
+    session=Depends(get_session),
+):
     db_user = session.scalar(
         select(User).where(
             (User.username == user.username) | (User.email == user.email)
@@ -67,6 +76,7 @@ def read_users(
     skip: int = 0,
     limit: int = 100,
     session: Session = Depends(get_session),
+    current_user=Depends(get_current_user),
 ):
     users = session.scalars(select(User).offset(skip).limit(limit)).all()
     return {"users": users}
@@ -74,34 +84,44 @@ def read_users(
 
 @app.put("/users/{user_id}", status_code=HTTPStatus.OK, response_model=UserPublic)
 def update_user(
-    user_id: int, user: UserSchema, session: Session = Depends(get_session)
+    user_id: int,
+    user: UserSchema,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
-    user_db = session.scalar(select(User).where(User.id == user_id))
-    if not user_db:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="User not found")
-    try:
-        user_db.username = user.username
-        user_db.email = user.email
-        user_db.password = get_password_hash(user.password)
 
-        session.add(user_db)
+    if current_user.id != user_id:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail="Not enough permission"
+        )
+    try:
+        current_user.username = user.username
+        current_user.email = user.email
+        current_user.password = get_password_hash(user.password)
+
+        session.add(current_user)
         session.commit()
     except IntegrityError:
         raise HTTPException(
             status_code=HTTPStatus.CONFLICT,
             detail="Username or Email already exists",
         )
-    session.refresh(user_db)
-    return user_db
+    session.refresh(current_user)
+    return current_user
 
 
 @app.delete("/users/{user_id}", status_code=HTTPStatus.OK, response_model=Message)
-def delete_user(user_id: int, session: Session = Depends(get_session)):
-    user_db = session.scalar(select(User).where(User.id == user_id))
-    if not user_db:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="User not found")
+def delete_user(
+    user_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
 
-    session.delete(user_db)
+    if current_user.id != user_id:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail="Not enough permission"
+        )
+    session.delete(current_user)
     session.commit()
     return {"message": "User deleted"}
 
@@ -114,3 +134,23 @@ def get_user(user_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="User not found")
 
     return user_db
+
+
+@app.post("/token", response_model=Token)
+def login_for_access_token(
+    from_data: OAuth2PasswordRequestForm = Depends(),
+    session: Session = Depends(get_session),
+):
+    user = session.scalar(select(User).where(User.email == from_data.username))
+
+    if not user:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail="Incorrect email or password"
+        )
+
+    if not verify_password(from_data.password, user.password):
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail="incorrect email or password"
+        )
+    access_token = create_acess_token({"sub": user.email})
+    return {"access_token": access_token, "token_type": "Bearer"}
