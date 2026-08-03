@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Olá, Mundo!</title>
+  <style>
+    /* Reset básico */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Fundo animado com gradiente */
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+      background-size: 400% 400%;
+      animation: gradientBg 12s ease infinite;
+    }
+
+    @keyframes gradientBg {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Cartão Principal (Vidro/Glassmorphism) */
+    .card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 3rem 4rem;
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      transform: translateY(20px);
+      opacity: 0;
+      animation: floatUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes floatUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Título com Glow */
+    h1 {
+      color: #ffffff;
+      font-size: 4rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 0.8rem;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    /* Subtítulo */
+    p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.25rem;
+      font-weight: 400;
+      margin-bottom: 2rem;
+    }
+
+    /* Botão Interativo */
+    .btn {
+      display: inline-block;
+      padding: 0.8rem 2rem;
+      background: #ffffff;
+      color: #e73c7e;
+      font-weight: 700;
+      font-size: 1rem;
+      border-radius: 50px;
+      text-decoration: none;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.25);
+      background: #ffffff;
+      color: #23a6d5;
+    }
+
+    .btn:active {
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+
+  <main class="card">
+    <h1>Olá, Mundo! 👋</h1>
+    <p>Pagina estilizada no tempo vago.</p>
+    <button class="btn" onclick="alert('Seja bem vindo! 🎉')">Clique Aqui</button>
+  </main>
+
+</body>
+</html>

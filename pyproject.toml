@@ -1,0 +1,63 @@
+[project]
+name = "fastapi-zero"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Noir-land",email = "156199278+Noir-land@users.noreply.github.com"}
+]
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi[standard] (>=0.140.13,<0.141.0)",
+    "sqlalchemy (>=2.0.51,<3.0.0)",
+    "pydantic-settings (>=2.14.2,<3.0.0)",
+    "alembic (>=1.18.5,<2.0.0)",
+    "pwdlib[argon2] (>=0.3.0,<0.4.0)"
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "ruff (>=0.16.0,<0.17.0)",
+    "pytest (>=9.1.1,<10.0.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)",
+    "poethepoet (>=0.48.0,<0.49.0)"
+]
+
+[tool.ruff]
+line-length = 88
+extend-exclude = ['migrations']
+
+[tool.ruff.lint]
+preview = true
+select = ['I', 'F', 'E', 'W', 'PL', 'PT']
+
+[tool.ruff.format]
+preview = true
+quote-style = 'double'
+
+[tool.pytest.ini_options]
+pythonpath = ['.']
+addopts = ['-p', 'no:warnings', '--cov=fast_zero', '--cov-context=test']
+
+[tool.poetry.requires-plugins]  
+poethepoet = { version = "~0.48.0", extras = ["poetry_plugin"]}
+
+[tool.poe] 
+poetry_command = ""
+
+[tool.poe.tasks]
+lint = { cmd = "ruff check" }
+format.sequence = [
+  { cmd = "ruff check --fix" },
+  { cmd = "ruff format" },
+]
+serve = "fastapi dev fast_zero/app.py"
+test.sequence = [
+  "lint",
+  { cmd = "pytest -s -x -vv $POE_EXTRA_ARGS" },
+  { cmd = "coverage html --show-contexts" },
+]
