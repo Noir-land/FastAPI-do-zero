@@ -12,7 +12,7 @@ from fast_zero.database import get_session
 from fast_zero.models import User
 from fast_zero.schemas import Message, Token, UserList, UserPublic, UserSchema
 from fast_zero.security import (
-    create_acess_token,
+    create_access_token,
     get_current_user,
     get_password_hash,
     verify_password,
@@ -150,7 +150,7 @@ def login_for_access_token(
 
     if not verify_password(from_data.password, user.password):
         raise HTTPException(
-            status_code=HTTPStatus.UNAUTHORIZED, detail="incorrect email or password"
+            status_code=HTTPStatus.UNAUTHORIZED, detail="Incorrect email or password"
         )
-    access_token = create_acess_token({"sub": user.email})
+    access_token = create_access_token({"sub": user.email})
     return {"access_token": access_token, "token_type": "Bearer"}
