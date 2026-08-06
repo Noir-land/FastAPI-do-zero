@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from http import HTTPStatus
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 import jwt
@@ -12,13 +13,14 @@ from sqlalchemy.orm import Session
 
 from fast_zero.database import get_session
 from fast_zero.models import User
+from fast_zero.settings import Settings
 
 pwd_context = PasswordHash.recommended()
 
-SECRECT_KEY = "ZReaGI7MzZe16Ho0tgQTCE/1HGpKjgB/0P5/TGlNZAc="
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-oauth2_schema = OAuth2PasswordBearer(tokenUrl="token")
+
+oauth2_schema = OAuth2PasswordBearer(tokenUrl="auth/token")
+Session = Annotated[Session, Depends(get_session)]
+Settings = Settings()
 
 
 def get_password_hash(password: str):
@@ -34,16 +36,16 @@ def create_access_token(data: dict):
     to_encode = data.copy()
 
     expire = datetime.now(tz=ZoneInfo("UTC")) + timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+        minutes=Settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
     to_encode.update({"exp": expire})
 
-    encode_jwt = encode(to_encode, SECRECT_KEY, algorithm=ALGORITHM)
+    encode_jwt = encode(to_encode, Settings.SECRECT_KEY, algorithm=Settings.ALGORITHM)
     return encode_jwt
 
 
 def get_current_user(
-    session: Session = Depends(get_session),
+    session: Session,
     token: str = Depends(oauth2_schema),
 ):
     credentials_exception = HTTPException(
@@ -53,7 +55,7 @@ def get_current_user(
     )
 
     try:
-        payload = jwt.decode(token, SECRECT_KEY, algorithms=ALGORITHM)
+        payload = jwt.decode(token, Settings.SECRECT_KEY, algorithms=Settings.ALGORITHM)
         subject_email = payload.get("sub")
         if not subject_email:
             raise credentials_exception
