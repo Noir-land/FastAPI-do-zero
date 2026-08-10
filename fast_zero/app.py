@@ -13,7 +13,7 @@ app.include_router(auth.router)
 
 
 @app.get("/", response_model=Message)
-def read_root():
+async def read_root():
     return {"message": "Olá Mundo!"}
 
 
