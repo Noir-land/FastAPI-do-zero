@@ -23,22 +23,24 @@ def test_jwt_invalid_token(client):
     assert response.json() == {"detail": "Could not validate credentials"}
 
 
-def test_get_current_user_not_found(client):
+def test_get_current_user_not_found(client, user):
     data = {"no-email": "test"}
     token = create_access_token(data)
 
-    response = client.put("/users/1", headers={"Authorization": f"Bearer {token}"})
+    response = client.put(
+        f"/users/{user.id}", headers={"Authorization": f"Bearer {token}"}
+    )
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED
     assert response.json() == {"detail": "Could not validate credentials"}
 
 
-def test_get_current_user_not_exists(client):
+def test_get_current_user_not_exists(client, user):
     data = {"sub": "test@test"}
     token = create_access_token(data)
 
     response = client.put(
-        "/users/1",
+        f"/users/{user.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
 
