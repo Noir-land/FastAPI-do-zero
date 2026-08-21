@@ -1,5 +1,9 @@
 import asyncio
 from logging.config import fileConfig
+import asyncio
+import sys
+
+
 
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
@@ -13,6 +17,9 @@ from fast_zero.settings import Settings
 # access to the values within the .ini file in use.
 config = context.config
 config.set_main_option("sqlalchemy.url", Settings().DATABASE_URL)
+
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

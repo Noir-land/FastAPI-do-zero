@@ -51,7 +51,11 @@ async def create_user(
 
 
 @router.get("/", status_code=HTTPStatus.OK, response_model=UserList)
-async def read_users(session: Session, filter_users: Annotated[FilterPage, Query()]):
+async def read_users(
+    session: Session,
+    filter_users: Annotated[FilterPage, Query()],
+    current_user: CurrentUser,
+):
     query = await session.scalars(
         select(User).offset(filter_users.offset).limit(filter_users.limit)
     )

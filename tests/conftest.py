@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import Session
-from sqlalchemy.pool import StaticPool
+from testcontainers.postgres import PostgresContainer
 
 from fast_zero.app import app
 from fast_zero.database import get_session
@@ -28,22 +28,23 @@ def client(session):
     app.dependency_overrides.clear()
 
 
+@pytest.fixture(scope="session")
+def engine():
+    with PostgresContainer("postgres:18", driver="psycopg") as postgres:
+        yield create_async_engine(postgres.get_connection_url())
+
+
 @pytest_asyncio.fixture
-async def session():
-    engine = create_async_engine(
-        "sqlite+aiosqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    try:
-        async with engine.begin() as conn:
-            await conn.run_sync(table_registry.metadata.create_all)
-        async with AsyncSession(engine, expire_on_commit=False) as session:
-            yield session
-        async with engine.begin() as conn:
-            await conn.run_sync(table_registry.metadata.drop_all)
-    finally:
-        await engine.dispose()
+async def session(engine):
+
+    async with engine.begin() as conn:
+        await conn.run_sync(table_registry.metadata.create_all)
+
+    async with AsyncSession(engine, expire_on_commit=False) as session:
+        yield session
+
+    async with engine.begin() as conn:
+        await conn.run_sync(table_registry.metadata.drop_all)
 
 
 @contextmanager
@@ -51,8 +52,8 @@ def _mock_db_time(model, time=datetime(2026, 7, 30)):
     def fake_time_hook(mapper, connection, target):
         if hasattr(target, "created_at"):
             target.created_at = time
-        if hasattr(target, "update_at"):
-            target.update_at = time
+        if hasattr(target, "updated_at"):
+            target.updated_at = time
 
     event.listen(model, "before_insert", fake_time_hook)
     yield time
