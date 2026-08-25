@@ -1,6 +1,7 @@
 [project]
 name = "fastapi-zero"
 version = "0.1.0"
+package-mode = false
 description = ""
 authors = [
     {name = "Noir-land",email = "156199278+Noir-land@users.noreply.github.com"}
