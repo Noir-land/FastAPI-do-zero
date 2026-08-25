@@ -1,0 +1,15 @@
+name: Pipeline
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Instalar python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - name: Instalar poetry
+        run: pipx install poetry
+        

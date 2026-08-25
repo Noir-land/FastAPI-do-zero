@@ -17,7 +17,6 @@ dependencies = [
     "pyjwt (>=2.13.0,<3.0.0)",
     "tzdata (>=2026.3,<2027.0)",
     "pytest-random-order (>=1.2.0,<2.0.0)",
-    "aiosqlite (>=0.22.1,<0.23.0)",
     "psycopg[binary] (>=3.3.4,<4.0.0)"
 ]
 

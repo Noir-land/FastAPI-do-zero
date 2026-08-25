@@ -1,7 +1,7 @@
 FROM python:3.14-slim
 ENV POETRY_VIRTUALENVS_CREATE=false
 
-WORKDIR app/
+WORKDIR /app
 COPY . .
 
 RUN pip install poetry 
