@@ -25,4 +25,4 @@ jobs:
         ACCESS_TOKEN_EXPIRE_MINUTES: ${{secrets.ACCESS_TOKEN_EXPIRE_MINUTES}}
         ALGORITHM: ${{ secrets.ALGORITHM }}
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        SECRECT_KEY: ${{ secrets.SECRECT_KEY }}
