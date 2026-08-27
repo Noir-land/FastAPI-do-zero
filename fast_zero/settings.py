@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
+from pydantic import field_validator
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
@@ -7,3 +7,14 @@ class Settings(BaseSettings):
     SECRECT_KEY: str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def montar_conexao_db(self, v: str) -> str:
+        if isinstance(v, str):
+            if v.startswith("postgres://"):
+                return v.replace("postgres://", "postgresql+psycopg://", 1)
+            if v.startswith("postgresql://") and not v.startswith(
+                "postgresql+psycopg://"
+            ):
+                return v.replace("postgresql://", "postgresql+psycopg://", 1)
+        return v
