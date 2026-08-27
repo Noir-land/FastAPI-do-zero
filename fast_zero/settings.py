@@ -7,9 +7,9 @@ class Settings(BaseSettings):
     SECRECT_KEY: str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
+
     @field_validator("DATABASE_URL", mode="before")
-    @classmethod
-    def montar_conexao_db(self, v: str) -> str:
+    def montar_conexao_db(v: str) -> str:
         if isinstance(v, str):
             if v.startswith("postgres://"):
                 return v.replace("postgres://", "postgresql+psycopg://", 1)
