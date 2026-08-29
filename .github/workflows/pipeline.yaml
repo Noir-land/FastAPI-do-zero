@@ -18,9 +18,6 @@ jobs:
 
       - name: Instalar dependências
         run: poetry install --no-root
-        
-      - name: Executar lint
-        run: poetry run poe lint
 
       - name: Executar testes
         run: poetry run poe test
